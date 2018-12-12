@@ -1,2 +1,7 @@
-# dimchat.github.io
-Decentralized Instant Messaging
+```
+我要这天，再遮不住我眼。
+我要这地，再埋不了我心。
+我要这众生，都明白我意。
+我要那诸佛，都烟消云散！
+        —— 齐天 @2018.12.12
+```
