@@ -22,24 +22,34 @@
         <meta name="msapplication-tap-highlight" content="no" />
         <title>Decentralized Instant Messaging</title>
         <style>
-            #challenge {
-                margin: 60px auto;
-                width: 300px;
-                font-size: 18px;
-                font-family: Arial, STHeiti, "Microsoft YaHei", "宋体", "WenQuanYi Micro Hei", sans-serif;
-                line-height: 36px;
+            .footer {
+                margin: 10px 20px;
+                border-top: 1px dashed #e0e0f5;
+                padding: 8px 0px;
+                font-size: small;
+                text-align: right;
             }
         </style>
     </head>
     <body>
         <div>
-            <pre id="challenge">
-                我要这天，再遮不住我眼；
-                我要这地，再埋不了我心。
-                我要这众生，都明白我意；
-                我要那诸佛，都烟消云散！
-                —— 齐天 @2018.12.12
-            </pre>
+            <h1>DIM! - Secure Chat</h1>
+            <div>This social network chatting client is based on a new protocol designed for instant messaging,
+                which named DIMP(Decentralized Instant Messaging Protocol).</div>
+            <ol>
+                <li>It generates user accounts in client (not server) and saved the private key in the client,
+                    just publish the user ID and public key onto the DIM network;</li>
+            
+                <li>Every user can get your ID &amp; public key, then can verify whether the public key
+                    is bound to the ID by the 'Meta Algorithm' in the client (again, not server);</li>
+            
+                <li>The sender must use the receiver's public key to encrypt the message content before sending out,
+                    so only the receiver's private key can decrypt it.</li>
+            </ol>
+            
+            <div class="footer">
+                <div>Copyright &copy;2019 Alber Moky</div>
+            </div>
         </div>
-    </body>
+  </body>
 </html>
