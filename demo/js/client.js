@@ -694,6 +694,7 @@
         var fsm = new StateMachine();
         fsm.server = this;
         fsm.delegate = this;
+        fsm.start();
         this.fsm = fsm;
         this.star = null;
         this.delegate = null;
@@ -784,15 +785,17 @@
                 "port": this.port
             }
         }
-        var socket = new SocketClient(this);
-        var onConnected = socket.onConnected;
-        socket.onConnected = function() {
-            onConnected.call(this);
-            notificationCenter.postNotification(kNotificationStationConnected, this, options)
-        };
-        socket.launch(options);
-        this.star = socket;
-        this.fsm.start()
+        app.write("Connecting to " + this.host + ":" + this.port + " ...");
+        if (!this.star) {
+            var socket = new SocketClient(this);
+            var onConnected = socket.onConnected;
+            socket.onConnected = function() {
+                onConnected.call(this);
+                notificationCenter.postNotification(kNotificationStationConnected, this, options)
+            };
+            this.star = socket
+        }
+        this.star.launch(options)
     };
     Server.prototype.stop = function() {
         this.star.terminate();
