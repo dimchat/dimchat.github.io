@@ -1,3 +1,4 @@
+;
 /**
  *  DIM-Client (v0.1.0)
  *  (DIMP: Decentralized Instant Messaging Protocol)
@@ -407,10 +408,10 @@
         var messenger = Messenger.getInstance();
         return messenger.sendCommand(cmd)
     };
-    if (typeof ns.extension !== "object") {
-        ns.extension = {}
+    if (typeof ns.extensions !== "object") {
+        ns.extensions = {}
     }
-    ns.extension.Register = Register
+    ns.extensions.Register = Register
 }(DIMP);
 ! function(ns) {
     var Base64 = ns.format.Base64;
@@ -452,10 +453,10 @@
             return SymmetricKey.getInstance(key)
         }
     };
-    if (typeof ns.extension !== "object") {
-        ns.extension = {}
+    if (typeof ns.extensions !== "object") {
+        ns.extensions = {}
     }
-    ns.extension.Password = Password
+    ns.extensions.Password = Password
 }(DIMP);
 ! function(ns) {
     var State = ns.fsm.State;
@@ -687,7 +688,7 @@
     var StateMachine = ns.network.StateMachine;
     var StarStatus = ns.stargate.StarStatus;
     var StarDelegate = ns.stargate.StarDelegate;
-    var SocketClient = ns.plugins.SocketClient;
+    var SocketClient = ns.stargate.extensions.SocketClient;
     var RequestWrapper = ns.network.RequestWrapper;
     var Server = function(identifier, host, port) {
         Station.call(this, identifier, host, port);
@@ -1012,6 +1013,7 @@
         this.loadProfile(identifier);
         this.profiles[identifier] = profile;
         console.log("saving profile for " + identifier);
+        notificationCenter.postNotification(kNotificationProfileUpdated, this, profile);
         return save_profiles(this.profiles)
     };
     ns.db.ProfileTable = ProfileTable
