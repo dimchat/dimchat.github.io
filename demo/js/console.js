@@ -30,7 +30,7 @@ $(function() {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/\n/g, '<br/>')
-            .replace(/\s/g, '&nbsp;');
+            .replace(/  /g, ' &nbsp;');
 
         var err_class = '';
 
@@ -58,7 +58,7 @@ $(function() {
             //e.clipboardData.getData('text/plain');
         }
         if (pastedText) {
-            $left.append(pastedText.replace(/\s/g, '&nbsp;'))
+            $left.append(pastedText.replace(/  /g, ' &nbsp;'))
         }
     });
 
@@ -120,7 +120,7 @@ $(function() {
             }
 
             if (val_ouput) {
-                $shell.before(template_output({separate:'&gt;', value:val_ouput, error: err_class}) + '<br />');
+                $shell.before(template_output({separate:'&gt;', value:val_ouput, error: err_class}));
             }
 
             scroll_to_bottom();

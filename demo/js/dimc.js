@@ -4,7 +4,7 @@
  *  (DIMP: Decentralized Instant Messaging Protocol)
  *
  * @author    moKy <albert.moky at gmail.com>
- * @date      Feb. 5, 2020
+ * @date      Feb. 7, 2020
  * @copyright (c) 2020 Albert Moky
  * @license   {@link https://mit-license.org | MIT License}
  */
@@ -276,6 +276,15 @@
         CommandProcessor.call(this, messenger)
     };
     SearchCommandProcessor.inherits(CommandProcessor);
+    var user_info = function(string) {
+        var facebook = Facebook.getInstance();
+        var identifier = facebook.getIdentifier(string);
+        if (!identifier) {
+            return string
+        }
+        var number = facebook.getNumberString(identifier);
+        return "(" + number + ") " + identifier
+    };
     SearchCommandProcessor.prototype.process = function(cmd, sender, msg) {
         var users = cmd.getUsers();
         var cnt = users ? users.length : 0;
@@ -284,11 +293,11 @@
             text = "user not found"
         } else {
             if (cnt === 1) {
-                text = "got one user - " + users[0]
+                text = "got one user - " + user_info(users[0])
             } else {
                 text = "got " + cnt + " users - ";
                 for (var i = 0; i < cnt; ++i) {
-                    text += "\n" + users[i]
+                    text += "\n" + user_info(users[i])
                 }
             }
         }
@@ -939,8 +948,8 @@
     MetaTable.prototype.saveMeta = function(meta, identifier) {
         this.loadMeta(identifier);
         if (this.metas[identifier]) {
-            console.log('meta already exists: ' + identifier);
-            return true;
+            console.log("meta already exists: " + identifier);
+            return true
         }
         this.metas[identifier] = meta;
         console.log("saving meta for " + identifier);
