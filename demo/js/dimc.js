@@ -53,6 +53,7 @@
     var PageContent = ns.protocol.PageContent;
     var ReceiptCommand = ns.protocol.ReceiptCommand;
     var ContentProcessor = ns.cpu.ContentProcessor;
+    var NotificationCenter = ns.stargate.NotificationCenter;
     var DefaultContentProcessor = ns.cpu.DefaultContentProcessor;
     var process = DefaultContentProcessor.prototype.process;
     DefaultContentProcessor.prototype.process = function(content, sender, msg) {
@@ -82,7 +83,8 @@
                 }
             }
         }
-        notificationCenter.postNotification(kNotificationMessageReceived, this, msg);
+        var nc = NotificationCenter.getInstance();
+        nc.postNotification(kNotificationMessageReceived, this, msg);
         var group = content.getGroup();
         if (group) {
             return null
@@ -268,6 +270,8 @@
     var Meta = ns.Meta;
     var SearchCommand = ns.protocol.SearchCommand;
     var CommandProcessor = ns.cpu.CommandProcessor;
+    var Facebook = ns.Facebook;
+    var NotificationCenter = ns.stargate.NotificationCenter;
     var SearchCommandProcessor = function(messenger) {
         CommandProcessor.call(this, messenger)
     };
@@ -290,6 +294,7 @@
         }
         var results = cmd.getResults();
         if (results) {
+            var facebook = Facebook.getInstance();
             var id, meta;
             var keys = Object.keys(results);
             for (var j = 0; j < keys.length; ++j) {
@@ -307,7 +312,8 @@
             }
         }
         cmd.setValue("text", text);
-        notificationCenter.postNotification(kNotificationMessageReceived, this, msg);
+        var nc = NotificationCenter.getInstance();
+        nc.postNotification(kNotificationMessageReceived, this, msg);
         return null
     };
     CommandProcessor.register(SearchCommand.SEARCH, SearchCommandProcessor);
@@ -405,8 +411,7 @@
                 cmd = MetaCommand.response(identifier, meta)
             }
         }
-        var messenger = Messenger.getInstance();
-        return messenger.sendCommand(cmd)
+        return Messenger.getInstance().sendCommand(cmd)
     };
     if (typeof ns.extensions !== "object") {
         ns.extensions = {}
@@ -686,6 +691,7 @@
     var MessengerDelegate = ns.MessengerDelegate;
     var StateDelegate = ns.fsm.StateDelegate;
     var StateMachine = ns.network.StateMachine;
+    var NotificationCenter = ns.stargate.NotificationCenter;
     var StarStatus = ns.stargate.StarStatus;
     var StarDelegate = ns.stargate.StarDelegate;
     var SocketClient = ns.stargate.extensions.SocketClient;
@@ -698,7 +704,7 @@
         fsm.start();
         this.fsm = fsm;
         this.star = null;
-        this.delegate = null;
+        this.stationDelegate = null;
         this.messenger = null;
         this.session = null;
         this.currentUser = null;
@@ -723,6 +729,9 @@
         return this.star.getStatus()
     };
     Server.prototype.send = function(data, delegate) {
+        if (!delegate) {
+            delegate = this
+        }
         var str = new ns.type.String(data, "UTF-8");
         this.star.send(str.toString(), delegate)
     };
@@ -760,7 +769,8 @@
         if (success) {
             console.log("handshake accepted for user: " + this.getCurrentUser());
             this.session = session;
-            notificationCenter.postNotification(kNotificationHandshakeAccepted, this, {
+            var nc = NotificationCenter.getInstance();
+            nc.postNotification(kNotificationHandshakeAccepted, this, {
                 session: session
             })
         } else {
@@ -786,13 +796,15 @@
                 "port": this.port
             }
         }
-        app.write("Connecting to " + this.host + ":" + this.port + " ...");
+        var nc = NotificationCenter.getInstance();
+        nc.postNotification(kNotificationStationConnecting, this, options);
         if (!this.star) {
             var socket = new SocketClient(this);
             var onConnected = socket.onConnected;
             socket.onConnected = function() {
                 onConnected.call(this);
-                notificationCenter.postNotification(kNotificationStationConnected, this, options)
+                var nc = NotificationCenter.getInstance();
+                nc.postNotification(kNotificationStationConnected, this, options)
             };
             this.star = socket
         }
@@ -824,9 +836,9 @@
     };
     Server.prototype.onSent = function(data, error, star) {
         if (error) {
-            this.delegate.didFailToSendPackage(error, data, this)
+            this.stationDelegate.didFailToSendPackage(error, data, this)
         } else {
-            this.delegate.didSendPackage(data, this)
+            this.stationDelegate.didSendPackage(data, this)
         }
     };
     Server.prototype.sendPackage = function(data, handler) {
@@ -977,6 +989,7 @@
 ! function(ns) {
     var Profile = ns.Profile;
     var Facebook = ns.Facebook;
+    var NotificationCenter = ns.stargate.NotificationCenter;
     var Table = ns.db.Table;
     var save_profiles = function(map) {
         return Table.save(map, ProfileTable)
@@ -1013,7 +1026,8 @@
         this.loadProfile(identifier);
         this.profiles[identifier] = profile;
         console.log("saving profile for " + identifier);
-        notificationCenter.postNotification(kNotificationProfileUpdated, this, profile);
+        var nc = NotificationCenter.getInstance();
+        nc.postNotification(kNotificationProfileUpdated, this, profile);
         return save_profiles(this.profiles)
     };
     ns.db.ProfileTable = ProfileTable
@@ -1149,13 +1163,16 @@
     var ProfileTable = ns.db.ProfileTable;
     var UserTable = ns.db.UserTable;
     var Facebook = ns.Facebook;
+    var Messenger = ns.Messenger;
     var s_facebook = null;
     Facebook.getInstance = function() {
         if (!s_facebook) {
             s_facebook = new Facebook();
             s_facebook.ans = AddressNameService.getInstance();
             s_facebook.immortals = new Immortals();
-            s_facebook.users = null
+            s_facebook.users = null;
+            s_facebook.metaQueryTime = {};
+            s_facebook.profileQueryTime = {}
         }
         return s_facebook
     };
@@ -1252,11 +1269,20 @@
         }
         var db = Table.create(MetaTable);
         var meta = db.loadMeta(identifier);
-        if (!meta && identifier.getType().isPerson()) {
+        if (meta) {
+            return meta
+        }
+        if (identifier.getType().isPerson()) {
             meta = this.immortals.getMeta(identifier);
             if (meta) {
                 return meta
             }
+        }
+        var now = new Date();
+        var last = this.metaQueryTime[identifier];
+        if (!last || (now.getTime() - last.getTime()) > 30000) {
+            this.metaQueryTime[identifier] = now;
+            Messenger.getInstance().queryMeta(identifier)
         }
         return meta
     };
@@ -1278,11 +1304,23 @@
     Facebook.prototype.loadProfile = function(identifier) {
         var db = Table.create(ProfileTable);
         var profile = db.loadProfile(identifier);
-        if (!profile && identifier.getType().isPerson()) {
+        if (profile) {
+            var names = profile.allPropertyNames();
+            if (names && names.length > 0) {
+                return profile
+            }
+        }
+        if (identifier.getType().isPerson()) {
             var tai = this.immortals.getProfile(identifier);
             if (tai) {
                 return tai
             }
+        }
+        var now = new Date();
+        var last = this.profileQueryTime[identifier];
+        if (!last || (now.getTime() - last.getTime()) > 30000) {
+            this.profileQueryTime[identifier] = now;
+            Messenger.getInstance().queryProfile(identifier)
         }
         return profile
     };
@@ -1373,9 +1411,8 @@
         if (res instanceof HandshakeCommand) {
             return res
         }
-        var facebook = this.getFacebook();
         var receiver = msg.envelope.sender;
-        receiver = facebook.getIdentifier(receiver);
+        receiver = Facebook.getInstance().getIdentifier(receiver);
         this.sendContent(res, receiver);
         return null
     };
@@ -1390,7 +1427,6 @@
         return this.sendContent(content, ID.ANYONE)
     };
     Messenger.prototype.broadcastProfile = function(profile) {
-        var facebook = this.getFacebook();
         var user = this.server.getCurrentUser();
         if (!user) {
             throw Error("login first")
@@ -1399,6 +1435,7 @@
         if (!contacts || contacts.length === 0) {
             return false
         }
+        var facebook = Facebook.getInstance();
         var identifier = profile.getIdentifier();
         identifier = facebook.getIdentifier(identifier);
         var meta = facebook.getMeta(identifier);
