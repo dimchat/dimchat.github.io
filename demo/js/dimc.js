@@ -903,6 +903,7 @@
 ! function(ns) {
     var Meta = ns.Meta;
     var Facebook = ns.Facebook;
+    var NotificationCenter = ns.stargate.NotificationCenter;
     var Table = ns.db.Table;
     var save_metas = function(map) {
         return Table.save(map, MetaTable)
@@ -939,7 +940,16 @@
         this.loadMeta(identifier);
         this.metas[identifier] = meta;
         console.log("saving meta for " + identifier);
-        return save_metas(this.metas)
+        var nc = NotificationCenter.getInstance();
+        if (save_metas(this.metas)) {
+            nc.postNotification(kNotificationMetaAccepted, this, {
+                "ID": identifier,
+                "meta": meta
+            })
+        } else {
+            var text = "failed to save meta: " + identifier + " -> " + ns.format.JSON.encode(meta);
+            console.log(text)
+        }
     };
     ns.db.MetaTable = MetaTable
 }(DIMP);
@@ -1027,8 +1037,12 @@
         this.profiles[identifier] = profile;
         console.log("saving profile for " + identifier);
         var nc = NotificationCenter.getInstance();
-        nc.postNotification(kNotificationProfileUpdated, this, profile);
-        return save_profiles(this.profiles)
+        if (save_profiles(this.profiles)) {
+            nc.postNotification(kNotificationProfileUpdated, this, profile)
+        } else {
+            var text = "failed to save profile: " + profile.getIdentifier() + " -> " + profile.getValue("data");
+            console.log(text)
+        }
     };
     ns.db.ProfileTable = ProfileTable
 }(DIMP);
