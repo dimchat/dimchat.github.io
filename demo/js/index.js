@@ -78,7 +78,7 @@ if (typeof dimsdk !== "object") {
             var tasks = tarsier.base.importings;
             if (tasks.length > 1) {
                 var next = tasks[1];
-                loader.showStatus('Loading ' + loader.base + next.url + ' ...');
+                loader.showStatus('Loading ' + next.url + ' ...');
             } else {
                 setTimeout(function () {
                     loader.fadeOut();
