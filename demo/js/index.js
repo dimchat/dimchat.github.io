@@ -69,12 +69,12 @@ if (typeof dimsdk !== "object") {
     };
 
     Loader.prototype.importCSS = function (href) {
-        tarsier.importCSS(href);
+        tarsier.importCSS(this.base + href);
     };
 
     Loader.prototype.importJS = function (src, callback) {
         var loader = this;
-        tarsier.importJS(src, function () {
+        tarsier.importJS(this.base + src, function () {
             var tasks = tarsier.base.importings;
             if (tasks.length > 1) {
                 var next = tasks[1];
