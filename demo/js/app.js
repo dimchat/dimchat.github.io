@@ -91,6 +91,10 @@
             if (identifier) {
                 profile = facebook.getProfile(identifier);
                 if (profile) {
+                    var user = facebook.getCurrentUser();
+                    if (user && user.getProfile()) {
+                        messenger.sendProfile(user.getProfile(), identifier);
+                    }
                     res = this.doCall(identifier);
                     if (res.indexOf('You are talking') === 0) {
                         res = this.doShow('users')
@@ -109,9 +113,13 @@
             this.tips('[Profile updated] ID: ' + profile.getIdentifier()
                 + ' -> ' + profile.getValue('data'));
             // chatroom
-            if (facebook.getIdentifier('chatroom').equals(profile.getIdentifier())) {
+            identifier = facebook.getIdentifier('chatroom');
+            if (identifier && identifier.equals(profile.getIdentifier())) {
+                // send current user's profile to chatroom
                 profile = facebook.getCurrentUser().getProfile();
-                messenger.sendProfile(profile, facebook.getIdentifier('chatroom'));
+                if (profile) {
+                    messenger.sendProfile(profile, identifier);
+                }
                 res = this.doCall('chatroom');
                 if (res.indexOf('You are talking') === 0) {
                     res = this.doShow('users')
@@ -167,7 +175,7 @@
 
     Application.prototype.exec = function (cmd) {
         var command = getCommand(cmd);
-        var args = null;
+        var args;
         var fn = 'do';
         if (command.length > 0) {
             fn += command.replace(command[0], command[0].toUpperCase());
@@ -360,6 +368,7 @@
     };
 
     Application.prototype.doName = function (nickname) {
+        var messenger = Messenger.getInstance();
         var facebook = Facebook.getInstance();
         var user = facebook.getCurrentUser();
         if (!user) {
@@ -376,7 +385,11 @@
         profile.setName(nickname);
         profile.sign(privateKey);
         facebook.saveProfile(profile);
-        Messenger.getInstance().postProfile(profile);
+        messenger.postProfile(profile);
+        var admin = facebook.getIdentifier('chatroom');
+        if (admin) {
+            messenger.sendProfile(profile, admin);
+        }
         return 'Nickname updated, profile: ' + profile.getValue('data');
     };
 
