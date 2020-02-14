@@ -200,13 +200,14 @@
     var text = 'Usage:\n';
     text += '        telnet [<host>[:<port>]] - re/connect (to a DIM station)\n';
     text += '        login <ID>               - switch user\n';
-    text += '        name <niciname>          - reset nickname\n';
+    text += '        name <nickname>          - reset nickname\n';
     text += '        call <ID>                - change recipient (or "chatroom")\n';
     text += '        send <text>              - send message to the recipient\n';
     text += '        who [am I]               - show current user info\n';
     text += '        show users               - list online users\n';
     text += '        search <ID|number>       - search users by ID or number\n';
     text += '        profile <ID>             - query profile with ID\n';
+    text += '        <anytext>                - send to current chatroom\n';
     text = Bubble.convertToString(text);
 
     Application.prototype.doHelp = function () {
