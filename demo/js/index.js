@@ -8,6 +8,7 @@
         this.status = document.getElementById('tarsier-status');
         this.alpha = 0;
         this.timer = null;
+        this.count = 0; // total resources
     };
 
     Loader.prototype.startAnimate = function (action, timeout) {
@@ -78,11 +79,13 @@
             url = this.base + src;
         }
         var loader = this;
+        loader.count += 1;
         tarsier.importJS(url, function () {
             var tasks = tarsier.base.importings;
             if (tasks.length > 1) {
                 var next = tasks[1];
-                loader.showStatus('Loading ' + next.url + ' ...');
+                var index = loader.count - tasks.length + 2;
+                loader.showStatus('Loading (' + index + '/' + loader.count + ') ' + next.url + ' ...');
             } else {
                 setTimeout(function () {
                     loader.fadeOut();
