@@ -437,4 +437,16 @@
         return text;
     };
 
+    Application.prototype.doHost58 = function (cmd) {
+        var pair = cmd.split(/\s+/);
+        var host = new DIMP.network.Host58(pair[1], 9394);
+        if (pair[0] === 'encode') {
+            return host.encode();
+        } else if (pair[0] === 'decode') {
+            return host.toString();
+        } else {
+            throw Error('unknown command "' + cmd + '"');
+        }
+    };
+
 }(DIMP);
