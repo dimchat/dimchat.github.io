@@ -146,9 +146,9 @@
                 } else {
                     group = group.name;
                 }
-                res = '"' + username + '" @[' + group + ']: ' + text;
+                res = '[' + group + '] (' + number + ') ' + username + ': ' + text;
             } else {
-                res = '"' + username + '" (' + number + '): ' + text;
+                res = '(' + number + ') ' + username + ': ' + text;
             }
         } else {
             res = 'Unknown notification: ' + name;
