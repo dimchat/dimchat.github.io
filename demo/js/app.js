@@ -138,7 +138,7 @@
             var number = facebook.getNumberString(sender);
             var text = msg.content.getValue('text');
             var group = msg.content.getGroup();
-            if (group && !group.equals(ID.EVERYONE)) {
+            if (group && !ID.EVERYONE.equals(group)) {
                 group = facebook.getIdentifier(group);
                 name = facebook.getNickname(group);
                 if (name) {
