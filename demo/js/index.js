@@ -202,13 +202,17 @@
 
     var dim_client = [
         /* DIM Client */
+        'js/dimc/extensions/constants.js',
+        'js/dimc/extensions/conversation.js',
+        'js/dimc/extensions/register.js',
+        'js/dimc/extensions/password.js',
         'js/dimc/protocol/search.js',
+
         'js/dimc/cpu/default.js',
         'js/dimc/cpu/handshake.js',
         'js/dimc/cpu/receipt.js',
         'js/dimc/cpu/search.js',
-        'js/dimc/extensions/register.js',
-        'js/dimc/extensions/password.js',
+
         'js/dimc/network/fsm.js',
         'js/dimc/network/delegate.js',
         'js/dimc/network/request.js',
@@ -226,6 +230,7 @@
         'js/dimc/cache.js',
         'js/dimc/ans.js',
         'js/dimc/facebook.js',
+        'js/dimc/amanuensis.js',
         'js/dimc/messenger.js',
         null
     ];

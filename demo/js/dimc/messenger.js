@@ -32,6 +32,8 @@
 
     var Messenger = ns.Messenger;
 
+    var MessageTable = ns.db.MessageTable;
+
     var s_messenger = null;
     Messenger.getInstance = function () {
         if (!s_messenger) {
@@ -39,7 +41,7 @@
             s_messenger.entityDelegate = Facebook.getInstance();
             s_messenger.cipherKeyDelegate = KeyStore.getInstance();
             s_messenger.server = null; // current station connected
-            // for duplicated querying
+            // for duplicate querying
             s_messenger.metaQueryTime = {};    // ID -> Date
             s_messenger.profileQueryTime = {}; // ID -> Date
             s_messenger.groupQueryTime = {};   // ID -> Date
@@ -187,19 +189,52 @@
             return true;
         }
 
+        var facebook = this.getFacebook();
+        var group = facebook.getIdentifier(content.getGroup());
+
         if (content instanceof InviteCommand) {
             // send keys again
-            var facebook = this.getFacebook();
             var me = facebook.getIdentifier(iMsg.envelope.receiver);
-            var group = facebook.getIdentifier(content.getGroup());
             var key = this.cipherKeyDelegate.getCipherKey(me, group);
             if (key) {
                 delete key['reused'];
             }
         }
 
-        // TODO: save instant message into database
-        return true;
+        // save instant message into database
+        if (group) {
+            return save_msg(iMsg, group);
+        }
+        var sender = facebook.getIdentifier(iMsg.envelope.sender);
+        var receiver = facebook.getIdentifier(iMsg.envelope.receiver);
+        // if (sender.equals(receiver)) {
+        //     console.log('loop message: ' + iMsg.getMap(false));
+        //     return true;
+        // }
+        if (facebook.getPrivateKeyForSignature(receiver)) {
+            // if (facebook.getPrivateKeyForSignature(sender)) {
+            //     throw Error('loop message: ' + iMsg.getMap(false));
+            // }
+            return save_msg(iMsg, sender);
+        }
+        return save_msg(iMsg, receiver);
+    };
+
+    var save_msg = function (msg, conversation) {
+        var db = MessageTable.getInstance();
+        var messages = db.loadMessages(conversation);
+        if (messages) {
+            for (var i = 0; i < messages.length; ++i) {
+                if (messages[i].equals(msg)) {
+                    console.log('duplicate message', msg);
+                    return false;
+                }
+            }
+            messages.push(msg);
+        } else {
+            messages = [msg];
+        }
+        return db.saveMessages(messages, conversation);
     };
 
     // Override
@@ -364,7 +399,7 @@
         if (identifier.isBroadcast()) {
             return false;
         }
-        // check for duplicated querying
+        // check for duplicate querying
         var now = new Date();
         var last = this.metaQueryTime[identifier];
         if (last && (now.getTime() - last.getTime()) < 30000) {
@@ -377,7 +412,7 @@
     };
 
     Messenger.prototype.queryProfile = function (identifier) {
-        // check for duplicated querying
+        // check for duplicate querying
         var now = new Date();
         var last = this.profileQueryTime[identifier];
         if (last && (now.getTime() - last.getTime()) < 30000) {
@@ -390,7 +425,7 @@
     };
 
     Messenger.prototype.queryGroupInfo = function (group, member) {
-        // check for duplicated querying
+        // check for duplicate querying
         var now = new Date();
         var last = this.groupQueryTime[group];
         if (last && (now.getTime() - last.getTime()) < 30000) {

@@ -3,7 +3,7 @@
  *  (DIMP: Decentralized Instant Messaging Protocol)
  *
  * @author    moKy <albert.moky at gmail.com>
- * @date      Mar. 17, 2020
+ * @date      Mar. 20, 2020
  * @copyright (c) 2020 Albert Moky
  * @license   {@link https://mit-license.org | MIT License}
  */
@@ -267,11 +267,15 @@ if (typeof DIMP !== "object") {
                 if (!obj2) {
                     return false
                 } else {
-                    if (typeof obj1["equals"] === "function") {
-                        return obj1.equals(obj2)
+                    if (typeof obj1 === "string" || typeof obj2 === "string") {
+                        return false
                     } else {
-                        if (typeof obj2["equals"] === "function") {
-                            return obj2.equals(obj1)
+                        if (typeof obj1["equals"] === "function") {
+                            return obj1.equals(obj2)
+                        } else {
+                            if (typeof obj2["equals"] === "function") {
+                                return obj2.equals(obj1)
+                            }
                         }
                     }
                 }
@@ -294,9 +298,51 @@ if (typeof DIMP !== "object") {
         remove: function(array, item) {
             var index = array.indexOf(item);
             if (index < 0) {
-                return null
+                return false
+            } else {
+                if (index === 0) {
+                    array.shift()
+                } else {
+                    if ((index + 1) === array.length) {
+                        array.pop()
+                    } else {
+                        array.splice(index, 1)
+                    }
+                }
             }
-            return array.splice(index, 1)
+            return true
+        },
+        update: function(array, index, item) {
+            if (index < 0) {
+                index += array.length;
+                if (index < 0) {
+                    return false
+                }
+            }
+            array[index] = item;
+            return true
+        },
+        insert: function(array, index, item) {
+            if (index < 0) {
+                index += array.length + 1;
+                if (index < 0) {
+                    return false
+                }
+            }
+            if (index === 0) {
+                array.unshift(item)
+            } else {
+                if (index === array.length) {
+                    array.push(item)
+                } else {
+                    if (index > array.length) {
+                        array[index] = item
+                    } else {
+                        array.splice(index, 0, item)
+                    }
+                }
+            }
+            return true
         },
         equals: is_objects_equal
     };
@@ -372,8 +418,12 @@ if (typeof DIMP !== "object") {
                 continue
             }
             v = elements[name];
-            if (typeof v !== "number") {
-                throw TypeError("Enum value must be a number!")
+            if (v instanceof base_enum) {
+                v = v.value
+            } else {
+                if (typeof v !== "number") {
+                    throw TypeError("Enum value must be a number!")
+                }
             }
             e = new enumeration(v, name);
             enumeration[name] = e
@@ -2213,6 +2263,14 @@ if (typeof DaoKeDao !== "object") {
         this.time = env["time"]
     };
     ns.Class(Envelope, Dictionary, null);
+    Envelope.prototype.getTime = function() {
+        var time = this.time;
+        if (time) {
+            return new Date(time * 1000)
+        } else {
+            return null
+        }
+    };
     Envelope.newEnvelope = function(sender, receiver, time) {
         var env = {
             "sender": sender,
