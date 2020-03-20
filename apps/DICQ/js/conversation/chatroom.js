@@ -33,7 +33,6 @@
     };
 
     ChatroomWindow.prototype.onReceiveNotification = function (notification) {
-        var identifier = ID.EVERYONE;
         var nc = NotificationCenter.getInstance();
         var name = notification.name;
         if (name === nc.kNotificationMessageReceived) {
@@ -74,6 +73,7 @@
             return false;
         }
         var content = new TextContent(text);
+        content.setGroup(ID.EVERYONE);
         var env = Envelope.newEnvelope(user.identifier, ID.EVERYONE, 0);
         var msg = InstantMessage.newMessage(content, env);
         messenger.saveMessage(msg);
