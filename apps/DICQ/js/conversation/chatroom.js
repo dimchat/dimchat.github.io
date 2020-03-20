@@ -88,7 +88,16 @@
         if (!clazz) {
             clazz = ChatroomWindow;
         }
-        return GroupChatWindow.show(admin, clazz);
+        var box = GroupChatWindow.show(admin, clazz);
+        // query history
+        var messenger = Messenger.getInstance();
+        var server = messenger.server;
+        var user = server.currentUser;
+        if (user) {
+            var content = new TextContent('show history');
+            messenger.sendContent(content, admin);
+        }
+        return box;
     };
 
     ns.ChatroomWindow = ChatroomWindow;

@@ -145,7 +145,7 @@
 !function (ns) {
     'use strict';
 
-    var release = false;
+    var release = true;
     if (ns['DEBUG']) {
         release = false;
     }
