@@ -6,7 +6,6 @@
     var GroupChatWindow = ns.GroupChatWindow;
 
     var ID = dimp.ID;
-    var User = dimp.User;
 
     var ForwardContent = dimp.protocol.ForwardContent;
     var TextContent = dimp.protocol.TextContent;
@@ -17,19 +16,19 @@
 
     var NotificationCenter = dimp.stargate.NotificationCenter;
 
-    var MessageTable = dimp.db.MessageTable;
-
     var ChatroomWindow = function () {
         GroupChatWindow.call(this);
         this.setClassName('chatroomWindow');
         this.setTitle('Chat Room');
     };
-    ChatroomWindow.prototype = Object.create(GroupChatWindow.prototype);
-    ChatroomWindow.prototype.constructor = ChatroomWindow;
+    dimp.Class(ChatroomWindow, GroupChatWindow, null);
 
-    ChatroomWindow.prototype.setIdentifier = function (identifier) {
-        ChatWindow.prototype.setIdentifier.call(this, identifier);
-        // TODO: update online users
+    ChatroomWindow.prototype.getAdministrator = function () {
+        return this.__identifier;
+    };
+    ChatroomWindow.prototype.getParticipants = function () {
+        // TODO: query online users
+        return [];
     };
 
     ChatroomWindow.prototype.onReceiveNotification = function (notification) {
@@ -37,33 +36,41 @@
         var name = notification.name;
         if (name === nc.kNotificationMessageReceived) {
             var msg = notification.userInfo;
-            var receiver = msg.envelope.receiver;
-            if (ID.EVERYONE.equals(receiver)) {
-                this.appendMessage(msg);
-            } else if (ID.EVERYONE.equals(msg.content.getGroup())) {
-                this.appendMessage(msg);
+            var env = msg.envelope;
+            var identifier = this.__identifier;
+            if (ID.EVERYONE.equals(env.receiver) ||
+                identifier.equals(env.receiver) ||
+                identifier.equals(env.sender)) {
+                // reload chat history
+                this.historyView.reloadData();
             }
         }
+        // TODO: process group members updated notification
     };
 
     ChatroomWindow.prototype.reloadData = function () {
-        this.clearMessages();
-        var db = MessageTable.getInstance();
-        var messages = db.loadMessages(ID.EVERYONE);
-        if (messages) {
-            for (var i = 0; i < messages.length; ++i) {
-                this.appendMessage(messages[i]);
-            }
+        ChatWindow.prototype.reloadData.call(this);
+        // TODO: query group owner & members
+        this.membersView.reloadData();
+    };
+
+    //
+    //  TableViewDataSource
+    //
+    ChatroomWindow.prototype.titleForHeaderInSection = function (section, tableView) {
+        if (tableView !== this.membersView) {
+            return ChatWindow.prototype.titleForHeaderInSection.call(this, section, tableView);
+        }
+        if (section === 0) {
+            return 'Administrator';
+        } else {
+            return 'Online user(s)';
         }
     };
 
-    ChatroomWindow.prototype.setAdmin = function (admin) {
-        if (admin instanceof User) {
-            admin = admin.identifier;
-        }
-        this.setIdentifier(admin);
-    };
-
+    //
+    //  Send message
+    //
     ChatroomWindow.prototype.sendText = function (text) {
         var messenger = Messenger.getInstance();
         var server = messenger.server;
@@ -81,10 +88,10 @@
         return this.sendContent(new ForwardContent(msg));
     };
 
+    //
+    //  Factory
+    //
     ChatroomWindow.show = function (admin, clazz) {
-        if (admin instanceof User) {
-            admin = admin.identifier;
-        }
         if (!clazz) {
             clazz = ChatroomWindow;
         }
