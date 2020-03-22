@@ -229,7 +229,7 @@
     text += '\n';
     text += '        <anytext>                - forward message (to current chatroom)\n';
     text += '\n';
-    text += '        dicq                     - open DICQ 2020\n';
+    text += '        open DICQ                - open DICQ 2020\n';
     text += '\n';
     text = Bubble.convertToString(text);
 
@@ -561,13 +561,15 @@
 
     var Application = ns.Application;
 
-    Application.prototype.doDicq = function () {
-        if (typeof dicq === 'object') {
-            // open DICQ
-            dicq.Main();
-        } else {
-            // load DICQ
-            ns.loader.importJS('../DICQ/js/index.js');
+    Application.prototype.doOpen = function (dicq) {
+        if (dicq === 'dicq' || dicq === 'DICQ') {
+            if (typeof dicq === 'object') {
+                // open DICQ
+                dicq.Main();
+            } else {
+                // load DICQ
+                ns.loader.importJS('../DICQ/js/index.js');
+            }
         }
     };
 
