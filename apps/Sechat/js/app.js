@@ -566,7 +566,8 @@
             // open DICQ
             dicq.Main();
         } else {
-            
+            // load DICQ
+            ns.loader.importJS('../DICQ/js/index.js');
         }
     };
 
