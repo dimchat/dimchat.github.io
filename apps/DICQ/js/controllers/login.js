@@ -117,6 +117,7 @@
         } else {
             box = new LoginWindow();
             $(document.body).appendChild(box);
+            box.layoutSubviews();
         }
         box.setUser(user);
         box.floatToTop();

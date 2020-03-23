@@ -111,6 +111,7 @@
         } else {
             box = new MainWindow();
             $(document.body).appendChild(box);
+            box.layoutSubviews();
         }
         box.floatToTop();
         return box;
