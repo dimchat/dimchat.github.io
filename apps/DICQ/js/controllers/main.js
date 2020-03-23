@@ -39,9 +39,9 @@
         //
         //  contacts list box
         //
-        var box = new View();
-        box.setId('box');
-        box.setClassName('box');
+        var box = new ns.MainListView();
+        box.setId('mainList');
+        box.setClassName('mainList');
         this.appendChild(box);
 
         //

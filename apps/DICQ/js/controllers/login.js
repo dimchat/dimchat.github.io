@@ -71,8 +71,7 @@
 
     LoginWindow.prototype.onClose = function (ev) {
         // cannot close this window
-        ns.RegisterWindow.show();
-        return true;
+        return false;
     };
 
     LoginWindow.prototype.login = function (identifier) {
