@@ -6,7 +6,6 @@
 
     var Rect = tui.Rect;
 
-    var View = tui.View;
     var Button = tui.Button;
     var Window = tui.Window;
 
@@ -56,6 +55,9 @@
         search.setId('searchBtn');
         search.setClassName('searchBtn buttonActive');
         search.setText('Search');
+        search.onClick = function (ev) {
+            ns.SearchWindow.show();
+        };
         this.appendChild(search);
 
         var browser = new Button();
@@ -68,8 +70,7 @@
         msg.setClassName('msgBtn buttonActive');
         msg.setText('Chat Room');
         msg.onClick = function (ev) {
-            var admin = 'chatroom-admin@2Pc5gJrEQYoz9D9TJrL35sA3wvprNdenPi7';
-            admin = facebook.getIdentifier(admin);
+            var admin = facebook.getIdentifier('chatroom');
             ns.ChatroomWindow.show(admin);
         };
         this.appendChild(msg);
