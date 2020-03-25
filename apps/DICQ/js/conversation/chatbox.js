@@ -175,9 +175,9 @@
         var content = iMsg.content;
         var text;
         if (content instanceof Command) {
-            text = MessageBuilder.getCommandText(content);
+            text = MessageBuilder.getCommandText(content, sender);
         } else {
-            text = MessageBuilder.getContentText(content);
+            text = MessageBuilder.getContentText(content, sender);
         }
         var textView = new Label();
         textView.setClassName('content');
