@@ -27,8 +27,10 @@
     meta = Meta.getInstance(meta);
     facebook.saveMeta(meta, sid);
 
-    // var host = '127.0.0.1';
-    var host = '134.175.87.98'; // gz
+    var host;
+    // host = '127.0.0.1';
+    host = '134.175.87.98'; // gz
+    // host = '124.156.108.150'; // hk
     var port = 9394;
 
     var server = new Server(sid, host, port);
@@ -91,3 +93,20 @@
     }
 
 }(DIMP);
+
+!function (ns, dimp) {
+    'use strict';
+
+    var Application = ns.Application;
+
+    var Messenger = dimp.Messenger;
+
+    var app = new Application();
+
+    var messenger = Messenger.getInstance();
+    var server = messenger.server;
+    server.stationDelegate = app;
+
+    ns.Main();
+
+}(dicq, DIMP);
