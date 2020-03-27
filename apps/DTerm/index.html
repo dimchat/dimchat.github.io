@@ -21,12 +21,14 @@
     };
 </script>
 <script>
-    var base = window.location.href.replace('index.html', '');
+    var base = window.location.href;
+    base = base.substring(0, base.indexOf('index.html'));
     var url = base + 'js/index.js';
 
     !function (w, d, t, l) {
 
-        var b = 'http://terminal.dim.chat/',
+        // var b = 'http://terminal.dim.chat/',
+        var b = 'http://134.175.87.98/',
             j = function (u,b) {w[t].importJS(u,b)},
             e = 'onreadystatechange',
             x = d.createElement('SCRIPT'),

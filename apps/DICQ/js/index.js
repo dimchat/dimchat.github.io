@@ -194,13 +194,15 @@ if (typeof dicq !== 'object') {
 
     var tarsier_ui = [
         // 'https://moky.github.io/Tarsier/build/tarsier-ui.js',
-        'http://terminal.dim.chat/Tarsier/tarsier-ui.js',
+        // 'http://terminal.dim.chat/Tarsier/tarsier-ui.js',
+        'http://134.175.87.98/Tarsier/tarsier-ui.js',
         null
     ];
     if (release) {
         tarsier_ui = [
             // 'https://moky.github.io/Tarsier/build/tarsier-ui.min.js',
-            'http://terminal.dim.chat/Tarsier/tarsier-ui.min.js',
+            // 'http://terminal.dim.chat/Tarsier/tarsier-ui.min.js',
+            'http://134.175.87.98/Tarsier/tarsier-ui.min.js',
             null
         ];
     }
@@ -218,6 +220,7 @@ if (typeof dicq !== 'object') {
     var scripts = [
         'js/views/ads.js',
         'js/views/fixedtable.js',
+        'js/views/usercell.js',
 
         'js/conversation/chatbox.js',
         'js/conversation/groupchat.js',
